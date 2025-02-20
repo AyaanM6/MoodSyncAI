@@ -22,18 +22,35 @@
                 const detectedEmotion = emotionData.emotion || "neutral";
                 document.getElementById('detected-emotion').innerText = "Detected Emotion: " + detectedEmotion;
 
-                // Fetch playlist based on detected emotion
-                const playlistResponse = await fetch(`/generate_playlist?emotion=${detectedEmotion}`);
-                const playlistData = await playlistResponse.json();
+                // Show the input form to ask for the number of songs
+                document.getElementById('song-count-form').style.display = 'block';
+                document.getElementById('submit-button').onclick = function() {
+                    const numSongs = document.getElementById('num-songs').value;
+                    generatePlaylist(detectedEmotion, numSongs);
+                };
+            } catch (error) {
+                document.getElementById('detected-emotion').innerText = "Error detecting emotion.";
+                document.getElementById('playlist-link').innerText = "Error fetching playlist.";
+            }
+        }
 
-                if (playlistData.playlist_url) {
-                    document.getElementById('playlist-link').innerHTML = `<a href="${playlistData.playlist_url}" target="_blank">View Playlist</a>`;
+        async function generatePlaylist(emotion, numSongs) {
+            try {
+                const response = await fetch('/generate_playlist', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `emotion=${emotion}&num_songs=${numSongs}`
+                });
+                const data = await response.json();
+                if (data.playlist_url) {
+                    document.getElementById('playlist-link').innerHTML = `<a href="${data.playlist_url}" target="_blank">View Playlist</a>`;
                 } else {
                     document.getElementById('playlist-link').innerText = "No playlist found for this mood.";
                 }
             } catch (error) {
-                document.getElementById('detected-emotion').innerText = "Error detecting emotion.";
-                document.getElementById('playlist-link').innerText = "Error fetching playlist.";
+                document.getElementById('playlist-link').innerText = "Error generating playlist.";
             }
         }
     </script>
@@ -48,6 +65,13 @@
     </div>
 
     <h2 id="detected-emotion"></h2>
+
+    <div id="song-count-form" style="display:none;">
+        <label for="num-songs">How many songs do you want in your playlist?</label>
+        <input type="number" id="num-songs" name="num-songs" min="1" max="50" value="10">
+        <button id="submit-button">Generate Playlist</button>
+    </div>
+
     <p id="playlist-link"></p>  <!-- This is where the playlist link will be shown -->
 </body>
 </html>
