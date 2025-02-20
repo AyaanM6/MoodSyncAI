@@ -32,9 +32,19 @@ sp = spotipy.Spotify(auth_manager=sp_oauth)
 # Load face cascade classifier
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-# Define the emotion detection function
-def detect_emotion_from_video():
-    cap = cv2.VideoCapture(0)  # Open the camera
+# Initialize video capture
+cap = cv2.VideoCapture(0)
+emotion_counter = Counter()
+start_time = None
+duration = 5  # Detect emotion for 5 seconds
+
+last_detected_emotion = "happy" #default global variable  
+
+
+def generate_frames():
+    global last_detected_emotion
+    cap = cv2.VideoCapture(0)  # Open the camera every time this function runs
+
     start_time = time.time()
     duration = 5  # Capture for 5 seconds
     emotion_counter = Counter()
@@ -46,8 +56,9 @@ def detect_emotion_from_video():
             break
 
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
         faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
-        
+
         if len(faces) == 0:
             print("No face detected")
         else:
@@ -56,49 +67,56 @@ def detect_emotion_from_video():
                 result = DeepFace.analyze(face_roi, actions=['emotion'], enforce_detection=False)
 
                 if result and 'dominant_emotion' in result[0]:
-                    mood = result[0]['dominant_emotion']
-                    emotion_counter[mood] += 1
-                    print(f"Detected Emotion: {mood}")  # Debugging print
+                    emotion = result[0]['dominant_emotion']
+                    emotion_counter[emotion] += 1
+                    print(f"Detected Emotion: {emotion}")  # Debugging print
 
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                cv2.putText(frame, mood, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+                cv2.putText(frame, emotion, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
 
-        # Stop after 5 seconds
+        _, buffer = cv2.imencode('.jpg', frame)
+        frame_bytes = buffer.tobytes()
+
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+
         if time.time() - start_time > duration:
             break
 
     cap.release()
     cv2.destroyAllWindows()
 
-    # Return the most detected emotion
+    # Save the most common detected emotion
     if emotion_counter:
-        most_common_emotion = emotion_counter.most_common(1)[0][0]
-        print(f"Most Detected Emotion: {most_common_emotion}")  # Debugging print
-        return most_common_emotion
+        last_detected_emotion = emotion_counter.most_common(1)[0][0]
+        print(f"Final Detected Emotion: {last_detected_emotion}")  # Debugging print
     else:
         print("No emotions detected, defaulting to neutral")
-        return "neutral"
+        last_detected_emotion = "neutral"
+
+
+
 
 @app.route('/video_feed')
 def video_feed():
-    return Response(detect_emotion_from_video(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 @app.route('/detect_emotion')
 def detect_emotion():
-    detected_emotion = detect_emotion_from_video()
-    print(f"Detected Emotion: {detected_emotion}")
-    session['detected_emotion'] = detected_emotion
-    return jsonify({'emotion': detected_emotion})
+    global last_detected_emotion
+    print(f"Returning Emotion: {last_detected_emotion}")  # Debugging print
+    return jsonify({'emotion': last_detected_emotion})
+
+
 
 def get_songs_based_on_mood(mood):
     mood_keywords = {
-        'angry': 'hard rock, aggressive rap, heavy metal, intense electronic',
-        'disgust': 'dark ambient, industrial, experimental, eerie beats',
-        'fear': 'chillwave, darkwave, experimental electronic, moody instrumental',
-        'happy': 'upbeat pop, feel-good anthems, party tracks, dance music',
-        'sad': 'acoustic ballads, mellow indie, somber R&B, sad pop',
-        'surprise': 'high-energy dance, electronic bangers, pop remixes',
-        'neutral': 'rap, hip-hop, chill beats, smooth jazz',
+        'happy': 'upbeat pop, teenage hits, chart-toppers',
+        'sad': 'acoustic, mellow pop, slow R&B',
+        'stressed': 'rap, hip-hop, intense beats',
+        'excited': 'dance, electronic, pop hits',
+        'relaxed': 'chill R&B, lo-fi, smooth pop',
     }
 
     if mood not in mood_keywords:
@@ -107,6 +125,7 @@ def get_songs_based_on_mood(mood):
     results = sp.search(q=mood_keywords[mood], type='track', limit=20)
     return [track['uri'] for track in results['tracks']['items']]
 
+
 @app.route('/')
 def home():
     if not sp_oauth.validate_token(cache_handler.get_cached_token()):
@@ -114,10 +133,12 @@ def home():
         return redirect(auth_url)
     return redirect(url_for('create_playlist'))
 
+
 @app.route('/callback')
 def callback():
     sp_oauth.get_access_token(request.args['code'])
     return redirect(url_for('create_playlist'))
+
 
 @app.route('/create_playlist', methods=['GET', 'POST'])
 def create_playlist():
@@ -127,29 +148,38 @@ def create_playlist():
 
     return render_template('index.html')
 
-@app.route('/generate_playlist', methods=['POST'])
+
+@app.route('/generate_playlist')
 def generate_playlist():
-    detected_emotion = request.form.get('emotion', 'neutral')
-    num_songs = int(request.form.get('num_songs', 10))
+    detected_emotion = request.args.get('emotion', 'neutral')
 
     user = sp.current_user()
     playlist = sp.user_playlist_create(user['id'], f"{detected_emotion.capitalize()} Vibes", public=False)
 
     song_uris = get_songs_based_on_mood(detected_emotion)
 
-    num_songs = min(num_songs, len(song_uris))
-
     if not song_uris:
         return jsonify({"message": f"No songs found for mood '{detected_emotion}'."})
 
-    sp.user_playlist_add_tracks(user['id'], playlist['id'], random.sample(song_uris, num_songs))
+    sp.user_playlist_add_tracks(user['id'], playlist['id'], random.sample(song_uris, min(10, len(song_uris))))
 
     return jsonify({"message": f"Playlist created!", "playlist_url": playlist['external_urls']['spotify']})
+
 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('home'))
 
+
 if __name__ == "__main__":
     app.run(port=8237, debug=True)
+
+
+
+
+
+
+
+
+
