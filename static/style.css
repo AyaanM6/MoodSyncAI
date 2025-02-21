@@ -1,0 +1,101 @@
+/* Apply gradient background to the entire body */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to bottom, black, darkgreen);
+    color: white;
+    font-family: Helvetica, sans-serif;
+    text-align: center;
+    display: block;  /* Use block layout to avoid flex container issues */
+    overflow-y: scroll;  /* Ensure scrolling appears on the right */
+}
+
+/* Ensure content is scrollable */
+body {
+    min-height: 100vh;  /* Make sure the body fills at least the viewport height */
+}
+
+/* Flexbox styling to center content */
+main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;  /* Allow this section to expand and take available space */
+    padding: 20px;
+}
+
+/* Button Styling */
+button {
+    border: 2px solid white;
+    background: transparent;
+    color: white;
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 10px; /* Rounded corners */
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+button:hover {
+    background: white;
+    color: black;
+}
+
+/* Video Container Styling */
+#video-container {
+    background: rgba(255, 255, 255, 0.1); /* Light transparent background */
+    padding: 15px;
+    border-radius: 15px; /* Rounded corners */
+    display: flex;
+    justify-content: center; /* Horizontally center the video feed */
+    align-items: center; /* Vertically center the video feed */
+    margin-top: 20px;
+    max-width: 640px;  /* Set max-width to prevent stretching */
+    width: 100%;  /* Ensure it adapts to the container */
+    height: auto;
+    position: relative;
+}
+
+/* Video Feed Styling */
+#video-feed {
+    width: 100%;  /* Make the video feed fill the container */
+    height: auto;  /* Keep the aspect ratio */
+    border-radius: 10px; /* Optional: rounded corners for the video */
+}
+
+/* Input Field Styling */
+input {
+    padding: 8px;
+    font-size: 16px;
+    border: 2px solid white;
+    border-radius: 8px; /* Slightly rounded */
+    background: transparent;
+    color: white;
+    text-align: center;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Playlist Link Styling with Glow */
+#playlist-link a {
+    color: lightgreen;
+    font-weight: bold;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    text-shadow: 0 0 10px lightgreen, 0 0 20px lightgreen, 0 0 30px lightgreen;  /* Glowing effect */
+}
+
+#playlist-link a:hover {
+    color: white;
+    text-shadow: 0 0 15px lightgreen, 0 0 25px lightgreen, 0 0 35px lightgreen;
+}
+
+/* Header Styling */
+h1, h2 {
+    margin: 0;
+    padding: 20px;
+}

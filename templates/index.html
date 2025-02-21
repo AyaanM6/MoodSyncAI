@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>Emotion-Based Playlist</title>
     <script>
         async function startCamera() {
@@ -56,11 +57,11 @@
     </script>
 </head>
 <body>
-    <h1>Emotion-Based Playlist Generator</h1>
+    <h1>MoodSync AI</h1>
+    <h2>Emotion-Based Spotify Playlist Generator</h2>
     <button onclick="startCamera()">Get Playlist</button>
 
     <div id="video-container" style="display:none;">
-        <h2>Detecting Emotion...</h2>
         <img id="video-feed" src="" width="640" height="480">
     </div>
 
