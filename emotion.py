@@ -15,6 +15,10 @@ emotion_counter = Counter()
 start_time = time.time()
 duration = 5  # Run for 5 seconds
 
+def capitalize_emotion(emotion):
+    """Ensure the emotion is capitalized correctly."""
+    return emotion.capitalize()
+
 while True:
     # Capture frame-by-frame
     ret, frame = cap.read()
@@ -35,8 +39,8 @@ while True:
         # Perform emotion analysis on the face ROI
         result = DeepFace.analyze(face_roi, actions=['emotion'], enforce_detection=False)
 
-        # Determine the dominant emotion
-        emotion = result[0]['dominant_emotion']
+        # Determine the dominant emotion and capitalize it
+        emotion = capitalize_emotion(result[0]['dominant_emotion'])
 
         # Update the emotion counter
         emotion_counter[emotion] += 1
@@ -48,12 +52,12 @@ while True:
     # Display the resulting frame
     cv2.imshow('Real-time Emotion Detection', frame)
 
-    # Check if 10 seconds have passed
+    # Check if the specified duration has passed
     if time.time() - start_time > duration:
-        # Find the most detected emotion
+        # Find the most detected emotion and capitalize it
         most_common_emotion = emotion_counter.most_common(1)
         if most_common_emotion:
-            emotion = most_common_emotion[0][0]
+            emotion = capitalize_emotion(most_common_emotion[0][0])
             print(f"Most detected emotion: {emotion}")
             
             # Send emotion to Flask app via GET request

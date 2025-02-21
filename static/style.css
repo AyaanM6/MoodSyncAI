@@ -1,101 +1,224 @@
-/* Apply gradient background to the entire body */
+/* Apply new color scheme and remove text shadow */
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    background: linear-gradient(to bottom, black, darkgreen);
-    color: white;
-    font-family: Helvetica, sans-serif;
+    background: linear-gradient(to bottom, #CCF0C3, #BCA3CA); /* Light green to light purple gradient */
+    color: #4A0E5C; /* Deep purple text color */
+    font-family: 'Svi Basic Manual', sans-serif; /* New font */
     text-align: center;
-    display: block;  /* Use block layout to avoid flex container issues */
-    overflow-y: scroll;  /* Ensure scrolling appears on the right */
+    display: block;
+    overflow-y: auto; /* Allow scrolling */
 }
 
-/* Ensure content is scrollable */
+/* Ensure content fills entire viewport height */
 body {
-    min-height: 100vh;  /* Make sure the body fills at least the viewport height */
+    min-height: 100vh;
 }
 
-/* Flexbox styling to center content */
-main {
+/* Fullscreen layout container */
+#fullscreen-container {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    flex-grow: 1;  /* Allow this section to expand and take available space */
+    width: 100%;
+    position: relative;
+    z-index: 1;
     padding: 20px;
 }
 
-/* Button Styling */
-button {
-    border: 2px solid white;
-    background: transparent;
-    color: white;
-    font-size: 16px;
-    padding: 10px 20px;
-    border-radius: 10px; /* Rounded corners */
-    cursor: pointer;
-    transition: background 0.3s ease, color 0.3s ease;
+/* MoodSync title styling (without text shadow) */
+h1 {
+    font-size: 48px;
+    color: black; /* Dark purple for title */
+    margin-top: 20px;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
 }
 
-button:hover {
-    background: white;
+/* Subtitle styling (without text shadow) */
+h2 {
+    font-size: 24px;
+    color: #341539; /* Dark purple for subtitle */
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+/* Button styling (Generate Playlist and Get Playlist) */
+button {
+    border: 3px solid #5d7b48; /* Dark green border */
+    background: #85a86c; /* Green background */
     color: black;
+    font-size: 18px;
+    padding: 15px 35px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+/* Hover effect for green-themed buttons */
+button:hover {
+    background: #5d7b48; /* Dark green on hover */
+    color: white; /* White text on hover */
+    transform: scale(1.1);
+    box-shadow: 0 0 20px #5d7b48;
 }
 
 /* Video Container Styling */
 #video-container {
-    background: rgba(255, 255, 255, 0.1); /* Light transparent background */
-    padding: 15px;
-    border-radius: 15px; /* Rounded corners */
+    background: rgba(255, 255, 255, 0.1);
+    padding: 12px;
+    border-radius: 15px;
     display: flex;
-    justify-content: center; /* Horizontally center the video feed */
-    align-items: center; /* Vertically center the video feed */
+    justify-content: center;
+    align-items: center;
     margin-top: 20px;
-    max-width: 640px;  /* Set max-width to prevent stretching */
-    width: 100%;  /* Ensure it adapts to the container */
+    max-width: 400px;
+    width: 100%;
     height: auto;
     position: relative;
 }
 
 /* Video Feed Styling */
 #video-feed {
-    width: 100%;  /* Make the video feed fill the container */
-    height: auto;  /* Keep the aspect ratio */
-    border-radius: 10px; /* Optional: rounded corners for the video */
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
 }
 
 /* Input Field Styling */
 input {
     padding: 8px;
     font-size: 16px;
-    border: 2px solid white;
-    border-radius: 8px; /* Slightly rounded */
-    background: transparent;
-    color: white;
+    border: 2px solid #7C4789; /* Dark purple border */
+    border-radius: 8px;
+    background: #e1cae6;
+    color: #7C4789;
     text-align: center;
+    margin-top: 10px; /* Give some space from the title/subtitle */
 }
 
-input::placeholder {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-/* Playlist Link Styling with Glow */
+/* Playlist Link Styling */
 #playlist-link a {
-    color: lightgreen;
+    color: #7C4789;
     font-weight: bold;
     text-decoration: none;
     transition: color 0.3s ease;
-    text-shadow: 0 0 10px lightgreen, 0 0 20px lightgreen, 0 0 30px lightgreen;  /* Glowing effect */
 }
 
 #playlist-link a:hover {
-    color: white;
-    text-shadow: 0 0 15px lightgreen, 0 0 25px lightgreen, 0 0 35px lightgreen;
+    color: #CCF0C3;
 }
 
-/* Header Styling */
+/* Smooth Transition Background Animation */
+@keyframes smooth-background {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+.squiggle-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(to right, #7C4789 25%, #BCA3CA 50%, #7C4789 75%);
+    animation: smooth-background 10s linear infinite;
+    opacity: 0.5;
+}
+
+/* Ensure header has appropriate margin and padding */
 h1, h2 {
     margin: 0;
-    padding: 20px;
+    padding: 15px;
+}
+
+/* For the playlist link container */
+#playlist-link {
+    margin-top: 30px;
+}
+
+/* Center mood detection area */
+#video-container {
+    margin: 0 auto;
+    max-width: 400px;
+    height: auto;
+    margin-top: 10px;
+}
+
+/* Adjust layout to ensure content is centered */
+#fullscreen-container {
+    overflow-y: auto; /* Allow scrolling */
+    padding-bottom: 50px; /* Ensure padding at the bottom for scrolling */
+}
+
+/* Style for Generate Playlist and Get Playlist (Green Themed) */
+#generate-playlist-button,
+#get-playlist-button {
+    border: 3px solid #5d7b48; /* Dark green border */
+    background: #85a86c; /* Green background */
+    color: black;
+    font-size: 18px;
+    padding: 15px 35px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    margin-top: 10px; /* Space above the button */
+}
+
+/* Hover effect for green-themed buttons */
+#generate-playlist-button:hover,
+#get-playlist-button:hover {
+    background: #5d7b48; /* Dark green on hover */
+    color: white; /* White text on hover */
+    transform: scale(1.1);
+    box-shadow: 0 0 20px #5d7b48;
+}
+
+/* Style for View Playlist (Purple Themed) */
+#view-playlist-button {
+    border: 3px solid #7C4789; /* Purple border */
+    background: #e1cae6; /* Light purple background */
+    color: black;
+    font-size: 18px;
+    padding: 15px 35px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    margin-top: 10px; /* Space above the button */
+    margin-bottom: 20px;
+}
+
+/* Hover effect for purple-themed button */
+#view-playlist-button:hover {
+    background: #733c7f; /* Dark purple on hover */
+    color: white; /* White text on hover */
+    transform: scale(1.1);
+    box-shadow: 0 0 20px #733c7f;
+}
+
+/* Adjust layout to ensure scrolling */
+body {
+    padding-bottom: 20px; /* Some padding at the bottom */
+}
+
+/* Ensure proper layout for buttons */
+#generate-playlist-button,
+#get-playlist-button,
+#view-playlist-button {
+    margin-bottom: 10px; /* Ensure some space below each button */
+}
+
+/* Adjust fullscreen container layout */
+#fullscreen-container {
+    padding-bottom: 50px; /* Ensure padding at the bottom for scrolling */
 }
